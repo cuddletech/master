@@ -1,8 +1,7 @@
 name: Bump children
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [released]
   workflow_dispatch:
     inputs:
       version:
@@ -13,14 +12,26 @@ on:
 jobs:
   bump:
     runs-on: ubuntu-latest
+    ## Matrix task, repeats steps for each repo
+    strategy:
+      matrix:
+        repo: ["cuddletech/child-one", "cuddletech/child-two"]
     steps:
       - uses: actions/checkout@v3
-      - name: Repository Dispatch
+      - name: Repository Dispatch (Workflow Dispatch)
         uses: peter-evans/repository-dispatch@v2
+        if: github.event_name == 'workflow_dispatch'
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: [cuddletech/child-one, cuddletech/child-two]
+          repository: ${{ matrix.repo }}
           event-type: kick
           client-payload: '{"version": "${{ github.event.inputs.version }}"}'
-
+      - name: Repository Dispatch (Release)
+        uses: peter-evans/repository-dispatch@v2
+        if: github.event_name == 'release'
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: ${{ matrix.repo }}
+          event-type: kick
+          client-payload: '{"version": "${{ github.event.release.tag_name }}"}'
 
