@@ -20,7 +20,7 @@ jobs:
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: cuddletech/child-one
-          event-type: my-event
+          event-type: kick
           client-payload: '{"version": "${{ github.event.inputs.version }}"}'
 
 
